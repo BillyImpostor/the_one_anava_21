@@ -1,0 +1,981 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>THE ONE ANAVA #21 — Explore The Sea, Chase The Victory</title>
+<style>
+:root{
+  --ink:#050e1d; --gold:#f2c14e; --gold2:#ffe29a; --gold3:#b8862b;
+  --maroon:#7a1426; --maroon2:#a3213a; --text:#f6ecd6; --muted:#cdbb98;
+  --good:#4fd18b; --bad:#ff6b6b;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html{scroll-behavior:smooth}
+body{
+  margin:0;min-height:100vh;color:var(--text);line-height:1.5;
+  font-family:"Segoe UI",system-ui,-apple-system,Roboto,"Helvetica Neue",Arial,sans-serif;
+  background:radial-gradient(1100px 650px at 50% 0%,#14487f 0,transparent 62%),radial-gradient(900px 600px at 8% 100%,#0e3a66 0,transparent 60%),linear-gradient(#0a2a4c,#06172e 60%,#041021);
+}
+body.noscroll{overflow:hidden}
+.display{font-family:"Cinzel","Trajan Pro","Palatino Linotype","Book Antiqua",Palatino,Georgia,serif;letter-spacing:.05em}
+button{font:inherit;color:inherit}
+button:focus-visible{outline:3px solid var(--gold2);outline-offset:2px}
+
+/* ===== Ocean background ===== */
+#sea{position:fixed;inset:0;width:100%;height:100%;z-index:0}
+#grid{position:fixed;inset:0;z-index:0;pointer-events:none;
+  background-image:linear-gradient(rgba(130,190,255,.04) 1px,transparent 1px),linear-gradient(90deg,rgba(130,190,255,.04) 1px,transparent 1px);
+  background-size:72px 72px;
+  -webkit-mask-image:radial-gradient(ellipse at center,#000 35%,transparent 100%);
+  mask-image:radial-gradient(ellipse at center,#000 35%,transparent 100%)}
+#mapart{position:fixed;inset:0;z-index:0;pointer-events:none}
+#mapart svg{width:100%;height:100%;display:block}
+#mapart::after{content:"";position:absolute;inset:0;background:radial-gradient(ellipse at 50% 40%,transparent 45%,rgba(2,8,20,.6) 100%)}
+
+#app{position:relative;z-index:1;max-width:1200px;margin:0 auto;padding:14px 14px 40px}
+
+/* ===== Wooden plank frame ===== */
+.plank{
+  position:relative;border:3px solid #1b0f08;border-radius:14px;
+  box-shadow:inset 0 0 0 2px var(--gold3),0 12px 30px rgba(0,0,0,.55);
+  background:
+    radial-gradient(circle at 11px 11px,#ffe29a 0 2px,#b8862b 3px 4px,transparent 5px) no-repeat,
+    radial-gradient(circle at calc(100% - 11px) 11px,#ffe29a 0 2px,#b8862b 3px 4px,transparent 5px) no-repeat,
+    radial-gradient(circle at 11px calc(100% - 11px),#ffe29a 0 2px,#b8862b 3px 4px,transparent 5px) no-repeat,
+    radial-gradient(circle at calc(100% - 11px) calc(100% - 11px),#ffe29a 0 2px,#b8862b 3px 4px,transparent 5px) no-repeat,
+    repeating-linear-gradient(90deg,rgba(255,255,255,.028) 0 1px,transparent 1px 6px),
+    repeating-linear-gradient(180deg,#3b2416 0 46px,#22130a 46px 48px);
+}
+
+/* ===== Hero / HUD ===== */
+.hero{padding:18px 22px 16px;margin-bottom:12px}
+.hero-top{display:flex;align-items:center;justify-content:center;gap:16px;text-align:center}
+.flag{font-size:44px;filter:drop-shadow(0 3px 4px #000);animation:sway 4s ease-in-out infinite}
+.hero-top .flag:last-child{animation-delay:-2s}
+@keyframes sway{50%{transform:rotate(7deg) translateY(-3px)}}
+h1{margin:0;font-size:clamp(24px,5vw,46px);line-height:1.1;color:var(--gold);
+  text-shadow:0 2px 0 #5a3a0a,0 4px 10px rgba(0,0,0,.8),0 0 22px rgba(242,193,78,.35)}
+.tag{margin:4px 0 0;color:#ffd6dc;font-size:clamp(12px,2.2vw,18px);text-shadow:0 2px 4px #000}
+.tag b{color:#ff8da0}
+.hud{display:grid;grid-template-columns:1.5fr .8fr .8fr 1.6fr;gap:12px;margin-top:16px}
+.hbox{background:rgba(8,4,2,.55);border:2px solid #1b0f08;border-radius:12px;padding:10px 14px;box-shadow:inset 0 0 0 1px rgba(242,193,78,.35)}
+.cap{display:flex;gap:12px;align-items:center}
+.skull{width:52px;height:52px;flex:none;border-radius:50%;display:grid;place-items:center;font-size:28px;
+  background:radial-gradient(circle at 30% 30%,var(--maroon2),var(--maroon) 70%);border:3px solid var(--gold3);box-shadow:0 0 14px rgba(163,33,58,.6)}
+.lbl{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+.cname{display:flex;align-items:center;gap:6px;font-size:19px;font-weight:700;color:var(--gold2)}
+.cname span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:190px}
+.mini{background:none;border:1px solid var(--gold3);border-radius:8px;padding:0 7px;cursor:pointer;color:var(--gold2)}
+.mini:hover{background:rgba(242,193,78,.18)}
+.crank{font-size:13px;color:#ffc9d1}
+.stat{display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center}
+.stat b{font-size:26px;color:var(--gold2);line-height:1.1}
+.stat .ic{font-size:20px}
+.prog .row{display:flex;justify-content:space-between;align-items:baseline}
+.bar{position:relative;height:16px;margin:8px 0 6px;border-radius:99px;background:#1a0e07;border:2px solid #0b0603;overflow:visible}
+.bar i{display:block;height:100%;width:0;border-radius:99px;background:linear-gradient(90deg,#b8862b,#ffe29a);box-shadow:0 0 12px rgba(242,193,78,.6);transition:width 1s ease}
+.bar em{position:absolute;top:-12px;left:0;font-style:normal;font-size:22px;transform:translateX(-50%);transition:left 1s ease;filter:drop-shadow(0 2px 2px #000)}
+.prog small{color:var(--muted)}
+
+/* ===== Tabs ===== */
+.tabs{display:flex;gap:8px;padding:8px;margin-bottom:12px}
+.tab{flex:1;padding:10px 8px;border-radius:10px;cursor:pointer;border:2px solid #1b0f08;background:linear-gradient(#4b2f1b,#2e1b0f);
+  font-weight:700;letter-spacing:.04em;color:var(--muted);transition:.15s}
+.tab:hover{color:var(--gold2)}
+.tab.on{color:#2b1700;background:linear-gradient(#ffe29a,#d9992b);border-color:#5a3a0a;box-shadow:0 0 14px rgba(242,193,78,.5)}
+
+/* ===== Buttons ===== */
+.btn{cursor:pointer;border:2px solid #1b0f08;border-radius:10px;padding:10px 16px;font-weight:700;color:var(--text);
+  background:linear-gradient(#4b2f1b,#2e1b0f);box-shadow:inset 0 1px 0 rgba(255,255,255,.1)}
+.btn:hover:not(:disabled){border-color:var(--gold)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.btn.gold{color:#2b1700;background:linear-gradient(#ffe29a,#d9992b);border-color:#5a3a0a}
+.btn.gold:hover:not(:disabled){filter:brightness(1.1);box-shadow:0 0 16px rgba(242,193,78,.6)}
+.btn.red{background:linear-gradient(var(--maroon2),var(--maroon));border-color:#3d0a14}
+
+/* ===== Map ===== */
+.panel{display:none}.panel.on{display:block}
+.mapwrap{padding:12px}
+.maphead{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;align-items:center;margin:2px 4px 10px}
+.maphead h2,.sect h2{margin:0;font-size:20px;color:var(--gold)}
+.legend{font-size:13px;color:var(--muted)}
+.map{position:relative;height:600px;border-radius:12px;overflow:hidden;border:3px solid #1b0f08;
+  box-shadow:inset 0 0 50px rgba(0,0,0,.65),0 0 0 2px var(--gold3);
+  background:radial-gradient(800px 380px at 25% 15%,rgba(40,130,210,.28),transparent 70%),radial-gradient(700px 400px at 85% 90%,rgba(20,90,160,.3),transparent 70%),linear-gradient(#0c2c50,#071a33)}
+.map.vertical{height:1300px}
+.mart{position:absolute;inset:0}
+.mart svg{width:100%;height:100%;display:block}
+.map::before{content:"";position:absolute;inset:-50%;background:repeating-linear-gradient(115deg,transparent 0 22px,rgba(160,210,255,.03) 22px 24px);animation:drift 20s linear infinite}
+.map::after{content:"";position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse at center,transparent 55%,rgba(0,0,10,.55) 100%)}
+@keyframes drift{to{transform:translate(70px,36px)}}
+.mgrid{position:absolute;inset:0;background-image:linear-gradient(rgba(150,200,255,.06) 1px,transparent 1px),linear-gradient(90deg,rgba(150,200,255,.06) 1px,transparent 1px);background-size:10% 20%}
+.map.vertical .mgrid{background-size:20% 10%}
+.ruler{position:absolute;font:600 10px ui-monospace,Menlo,Consolas,monospace;color:rgba(190,225,255,.55);z-index:2}
+.mcompass{position:absolute;right:12px;top:10px;width:96px;opacity:.55;z-index:2;pointer-events:none}
+.mcompass svg{width:100%;animation:needle 8s ease-in-out infinite}
+@keyframes needle{0%,100%{transform:rotate(-8deg)}50%{transform:rotate(10deg)}}
+.deco{position:absolute;font-size:34px;opacity:.32;z-index:1;pointer-events:none;animation:float 9s ease-in-out infinite}
+@keyframes float{50%{transform:translate(18px,-10px) rotate(4deg)}}
+#routes{position:absolute;inset:0;width:100%;height:100%;z-index:2;pointer-events:none}
+.rt-base{fill:none;stroke:rgba(190,235,255,.6);stroke-width:4;stroke-dasharray:.1 11;stroke-linecap:round;vector-effect:non-scaling-stroke}
+.rt{fill:none;stroke:transparent;stroke-width:5;stroke-linecap:round;stroke-dasharray:.1 11;vector-effect:non-scaling-stroke}
+.rt.lit{stroke:var(--gold2);filter:drop-shadow(0 0 6px rgba(242,193,78,.95));animation:dash 1s linear infinite}
+@keyframes dash{to{stroke-dashoffset:-22}}
+
+.isle{position:absolute;z-index:3;width:170px;transform:translate(-50%,-50%);background:none;border:0;padding:0;cursor:pointer;
+  display:flex;flex-direction:column;align-items:center;gap:2px;text-align:center;transition:transform .2s}
+.isle:hover:not(:disabled){transform:translate(-50%,-53%) scale(1.06)}
+.isle:disabled{cursor:not-allowed;color:inherit}
+.isle-art{position:relative;display:block;width:136px;height:106px}
+.isle-art svg{width:100%;height:100%;overflow:visible;filter:drop-shadow(0 7px 8px rgba(0,0,0,.55))}
+.isle.open .isle-art{animation:bob 3.4s ease-in-out infinite}
+.isle.open .isle-art svg{filter:drop-shadow(0 0 5px #38d9ff) drop-shadow(0 0 18px rgba(56,217,255,.9))}
+.isle.done .isle-art svg{filter:drop-shadow(0 0 9px rgba(79,209,139,.75)) drop-shadow(0 6px 8px rgba(0,0,0,.5))}
+@keyframes bob{50%{transform:translateY(-5px)}}
+.isle.locked .isle-art svg{filter:grayscale(1) brightness(.5) blur(.5px)}
+.fog{position:absolute;inset:-14px -22px;border-radius:50%;opacity:0;pointer-events:none;background:radial-gradient(closest-side,rgba(205,220,240,.6),rgba(205,220,240,0) 100%)}
+.isle.locked .fog{opacity:.9;animation:fog 7s ease-in-out infinite}
+@keyframes fog{50%{transform:translateX(10px) scale(1.06);opacity:.65}}
+.lock{position:absolute;left:50%;top:42%;transform:translate(-50%,-50%);font-size:34px;filter:drop-shadow(0 2px 4px #000)}
+.skullmed{position:absolute;left:50%;top:44%;transform:translate(-50%,-50%);width:50px;height:50px;border-radius:50%;display:grid;place-items:center;font-size:27px;
+  background:radial-gradient(circle at 35% 30%,#4b2f1b,#150a04);border:3px solid var(--gold);box-shadow:0 0 14px rgba(56,217,255,.9),inset 0 0 8px #000}
+.skullmed::after{content:"🧭";position:absolute;right:-17px;top:-12px;font-size:18px;filter:drop-shadow(0 2px 3px #000)}
+.stamp{position:absolute;right:2px;top:-4px;width:28px;height:28px;border-radius:50%;display:grid;place-items:center;font-weight:900;color:#06361d;
+  background:radial-gradient(circle at 30% 30%,#9bf3c4,var(--good));border:2px solid #0d5a35;box-shadow:0 0 10px rgba(79,209,139,.7)}
+.isle-num{position:absolute;left:14px;top:-6px;z-index:2;width:28px;height:28px;border-radius:50%;display:grid;place-items:center;font:800 14px Georgia,serif;color:#3a2200;
+  background:radial-gradient(circle at 30% 30%,#ffe9a8,var(--gold3));border:2px solid #5a3a0a}
+.isle.locked .isle-num{filter:grayscale(1) brightness(.7)}
+.isle-name{position:relative;margin-top:-6px;padding:3px 14px;border-radius:5px;font:800 13px/1.2 "Cinzel","Palatino Linotype",Georgia,serif;letter-spacing:.02em;
+  color:#3a2208;text-shadow:0 1px 0 rgba(255,240,200,.65);background:linear-gradient(#f7dea3,#d9ad60);
+  border:2px solid #7a4f1c;box-shadow:0 3px 7px rgba(0,0,0,.6),inset 0 0 0 1px rgba(255,255,255,.4)}
+.isle-name::before,.isle-name::after{content:"";position:absolute;top:50%;width:4px;height:4px;border-radius:50%;background:#7a4f1c;transform:translateY(-50%)}
+.isle-name::before{left:4px}.isle-name::after{right:4px}
+.isle.locked .isle-name{background:linear-gradient(#aeb2ba,#7d828c);border-color:#4b4f57;color:#262a30;text-shadow:none}
+.isle-sub{font-size:11.5px;color:#e9ddc2;text-shadow:0 1px 3px #000,0 0 6px #000}
+.isle-st{margin-top:1px;font-size:11px;font-weight:700;padding:1px 9px;border-radius:99px;background:rgba(0,0,0,.62);border:1px solid rgba(242,193,78,.4)}
+.isle.locked .isle-sub{color:#9aa6b6}
+.isle.locked .isle-st{color:#9aa6b6;border-color:rgba(160,170,190,.4)}
+.isle.open .isle-st{color:#8fe9ff;border-color:#38d9ff}
+.isle.done .isle-st{color:#8df0b8;border-color:var(--good)}
+.isle.just .isle-art{animation:pop 1s ease 2}
+@keyframes pop{30%{transform:scale(1.25) rotate(-3deg)}60%{transform:scale(.95)}}
+.ship{position:absolute;z-index:4;pointer-events:none;transform:translate(62px,-74px);transition:left 2.2s ease-in-out,top 2.2s ease-in-out}
+.ship span{display:block;font-size:34px;filter:drop-shadow(0 4px 4px #000);animation:rock 3s ease-in-out infinite}
+@keyframes rock{50%{transform:rotate(-8deg) translateY(-4px)}}
+
+/* ===== Leaderboard / Logbook ===== */
+.sect{padding:16px}
+.sect-h{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:12px}
+.seg{display:flex;gap:6px}
+.seg .btn{padding:6px 12px;font-size:13px}
+.seg .btn.on{color:#2b1700;background:linear-gradient(#ffe29a,#d9992b)}
+.lb{display:flex;flex-direction:column;gap:6px}
+.lbrow{display:grid;grid-template-columns:48px 1.6fr 1.3fr .8fr .8fr;gap:8px;align-items:center;padding:9px 12px;border-radius:10px;
+  background:rgba(8,4,2,.55);border:2px solid #1b0f08}
+.lbrow.head{background:none;border:0;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);padding-top:0;padding-bottom:0}
+.lbrow.me{border-color:var(--gold);background:linear-gradient(90deg,rgba(242,193,78,.22),rgba(8,4,2,.6));box-shadow:0 0 16px rgba(242,193,78,.3)}
+.lbrow .rk{font-size:20px;text-align:center;font-weight:800;color:var(--gold2)}
+.lbrow .nm{font-weight:700;display:flex;gap:8px;align-items:center;min-width:0}
+.lbrow .nm span:last-child{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.lbrow .fl{color:var(--muted);font-size:13px}
+.lbrow .n{text-align:right;font-weight:800;color:var(--gold2)}
+.you{font-size:10px;background:var(--maroon2);color:#fff;padding:1px 6px;border-radius:99px;letter-spacing:.08em}
+.note{font-size:12px;color:var(--muted);margin-top:10px}
+.bgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px}
+.bdg{padding:14px;border-radius:12px;background:rgba(8,4,2,.55);border:2px solid var(--gold3);text-align:center;position:relative}
+.bdg .ico{font-size:44px;filter:drop-shadow(0 3px 4px #000)}
+.bdg h3{margin:4px 0 2px;font-size:15px;color:var(--gold2)}
+.bdg p{margin:0;font-size:12.5px;color:var(--muted)}
+.bdg.lockd{border-color:#3a3f4a;filter:grayscale(1)}
+.bdg.lockd .ico{opacity:.35}
+.bdg.lockd h3{color:#aeb6c4}
+.bdg .when{display:block;margin-top:6px;font-size:11px;color:#8df0b8}
+.logs{display:flex;flex-direction:column;gap:6px;margin-top:6px}
+.logrow{display:flex;justify-content:space-between;gap:10px;padding:8px 12px;border-radius:10px;background:rgba(8,4,2,.5);border:1px solid rgba(242,193,78,.25);font-size:14px;flex-wrap:wrap}
+.sums{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin-bottom:16px}
+.sums div{padding:10px;border-radius:10px;background:rgba(8,4,2,.55);border:2px solid #1b0f08;text-align:center}
+.sums b{display:block;font-size:22px;color:var(--gold2)}
+.sums small{color:var(--muted)}
+
+/* ===== Modals ===== */
+.backdrop{position:fixed;inset:0;z-index:50;display:grid;place-items:center;padding:12px;background:rgba(2,8,20,.78);backdrop-filter:blur(5px);-webkit-backdrop-filter:blur(5px);animation:fade .2s}
+@keyframes fade{from{opacity:0}}
+#dlg{z-index:70}
+#modal{padding:0;place-items:stretch;background:rgba(2,8,20,.94);-webkit-backdrop-filter:none;backdrop-filter:none}
+.modal{width:100%;height:100vh;height:100dvh;max-height:none;border-radius:0;border-width:0;box-shadow:none;display:flex;flex-direction:column;padding:0;overflow:hidden}
+#mBody{flex:1;min-height:0;display:flex;flex-direction:column}
+.mwrap{width:100%;max-width:1100px;margin:0 auto}
+.mrow{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.mtop{flex:none;padding:10px 20px;background:rgba(6,3,1,.62);border-bottom:2px solid rgba(242,193,78,.45)}
+.mtop h2{margin:0;font-size:clamp(17px,2.6vw,26px);color:var(--gold);line-height:1.2}
+.mtop small{color:var(--muted)}
+.hact{display:flex;align-items:center;gap:10px}
+.xbtn{padding:8px 13px}
+.mscroll{flex:1;min-height:0;overflow-y:auto;padding:16px 20px;-webkit-overflow-scrolling:touch}
+.timer{display:flex;align-items:center;gap:10px;padding:5px 14px 5px 8px;border-radius:12px;background:rgba(0,0,0,.5);border:2px solid var(--gold3)}
+.timer .hg{width:40px;height:58px;display:block}
+.timer .t{font:800 28px ui-monospace,Menlo,Consolas,monospace;color:var(--gold2);line-height:1}
+.timer .l{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.timer.warn{border-color:var(--bad);animation:pulse 1s ease-in-out infinite}
+.timer.warn .t{color:#ff9a9a}
+@keyframes pulse{50%{box-shadow:0 0 18px rgba(255,107,107,.8)}}
+.chips{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+.chip{width:40px;height:40px;border-radius:50%;cursor:pointer;font-weight:800;border:2px solid #1b0f08;background:linear-gradient(#4b2f1b,#2e1b0f);color:var(--muted)}
+.chip.ans{border-color:var(--gold3);color:var(--gold2)}
+.chip.cur{background:linear-gradient(#ffe29a,#d9992b);color:#2b1700;border-color:#5a3a0a}
+.qcard{background:rgba(8,4,2,.55);border:2px solid #1b0f08;border-radius:12px;padding:16px 18px;box-shadow:inset 0 0 0 1px rgba(242,193,78,.3)}
+.qno{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold3);margin-bottom:8px;font-weight:700}
+.qgrid{display:grid;grid-template-columns:1fr;gap:16px}
+@media (min-width:900px){.qgrid{grid-template-columns:1fr 1fr;gap:24px;align-items:start}}
+.qtext{white-space:pre-line;font-size:17px;line-height:1.6}
+.opts{display:flex;flex-direction:column;gap:8px}
+.opt{display:flex;gap:12px;align-items:flex-start;width:100%;text-align:left;padding:10px 12px;border-radius:10px;cursor:pointer;
+  border:2px solid #1b0f08;background:linear-gradient(#4b2f1b,#3a2415);box-shadow:inset 0 1px 0 rgba(255,255,255,.08);font-size:16px}
+.opt .k{flex:none;width:30px;height:30px;border-radius:50%;display:grid;place-items:center;font-weight:800;color:#3a2200;
+  background:radial-gradient(circle at 30% 30%,#ffe9a8,var(--gold3));border:2px solid #5a3a0a}
+.opt:hover:not(:disabled){border-color:var(--gold)}
+.opt.sel{border-color:var(--gold);background:linear-gradient(#6a3f1f,#4d2c15);box-shadow:0 0 0 2px rgba(242,193,78,.4)}
+.opt.off{opacity:.3;text-decoration:line-through;cursor:not-allowed}
+.pws{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
+.pw{padding:8px 12px;border-radius:10px;cursor:pointer;font-weight:700;border:2px solid #0d3d2b;background:linear-gradient(#1f6a4d,#124632)}
+.pw.sp{border-color:#0d2f4d;background:linear-gradient(#1f5a8f,#123a5e)}
+.pw:disabled{opacity:.4;cursor:not-allowed}
+.pw small{font-weight:400;opacity:.85}
+.hint{margin-top:12px;padding:10px 12px;border-radius:10px;background:rgba(31,90,143,.3);border:1px dashed #6fb3ee;font-size:14.5px}
+.hint.g{background:rgba(31,106,77,.3);border-color:#6fe0ae}
+.mfoot{flex:none;padding:10px 20px calc(10px + env(safe-area-inset-bottom));background:rgba(6,3,1,.78);border-top:2px solid rgba(242,193,78,.45)}
+.mfoot .grp{display:flex;gap:8px}
+.mfoot .btn.gold{font-size:15px;padding:11px 20px}
+
+/* result */
+.res{text-align:center}
+.ring{width:170px;height:170px;margin:6px auto 8px;border-radius:50%;display:grid;place-items:center;
+  background:radial-gradient(circle at 50% 35%,#4a2d15,#1d0f06 70%);border:6px solid var(--gold);box-shadow:0 0 30px rgba(242,193,78,.55),inset 0 0 20px #000}
+.ring b{font-size:48px;color:var(--gold2);line-height:1;display:block}
+.ring small{color:var(--muted);letter-spacing:.14em;text-transform:uppercase;font-size:11px}
+.rsum{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px;margin:14px 0}
+.rsum div{padding:10px;border-radius:10px;background:rgba(8,4,2,.55);border:2px solid #1b0f08}
+.rsum b{display:block;font-size:22px;color:var(--gold2)}
+.rsum small{color:var(--muted)}
+.unl{margin:10px 0;padding:12px;border-radius:12px;background:linear-gradient(90deg,rgba(242,193,78,.25),rgba(242,193,78,.08));border:2px solid var(--gold);font-weight:700}
+.newb{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin:8px 0}
+.newb span{padding:6px 12px;border-radius:99px;background:rgba(79,209,139,.18);border:1px solid var(--good);font-size:14px}
+.rev{text-align:left;margin-top:12px;display:flex;flex-direction:column;gap:8px}
+.rev details{border-radius:10px;border:2px solid #1b0f08;background:rgba(8,4,2,.5);padding:8px 12px}
+.rev summary{cursor:pointer;font-weight:700}
+.rev .ok{color:#8df0b8}.rev .no{color:#ff9a9a}
+.rev p{margin:6px 0;white-space:pre-line;font-size:14.5px}
+.rtn{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:14px}
+
+.dbox{width:min(440px,100%);padding:20px;text-align:center}
+.dbox h3{margin:0 0 6px;color:var(--gold);font-size:22px}
+.dbox p{margin:0 0 14px}
+.dbox .row{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+.introbox{width:min(480px,100%);padding:24px;text-align:center}
+.introbox .big{font-size:60px;filter:drop-shadow(0 4px 6px #000)}
+.introbox h2{margin:4px 0 6px;color:var(--gold);font-size:24px}
+.introbox input{width:100%;padding:12px;margin:12px 0;border-radius:10px;border:2px solid var(--gold3);background:#1a0e07;color:var(--text);font-size:17px;text-align:center}
+.introbox input:focus{outline:3px solid var(--gold2)}
+
+#toasts{position:fixed;left:50%;bottom:18px;transform:translateX(-50%);z-index:90;display:flex;flex-direction:column;gap:8px;align-items:center;width:min(92vw,460px);pointer-events:none}
+.toast{padding:10px 16px;border-radius:12px;background:#1d0f06;border:2px solid var(--gold);box-shadow:0 8px 24px rgba(0,0,0,.6);font-weight:600;text-align:center;animation:tin .3s,tout .4s 3.6s forwards}
+.toast.good{border-color:var(--good)}
+@keyframes tin{from{opacity:0;transform:translateY(14px)}}
+@keyframes tout{to{opacity:0;transform:translateY(10px)}}
+
+footer{margin-top:18px;text-align:center;font-size:12.5px;color:var(--muted)}
+footer .btn{margin-top:8px;font-size:12px;padding:6px 12px}
+
+@media (max-width:960px){
+  .hud{grid-template-columns:1fr 1fr}
+  .cap{grid-column:1/-1}
+  .prog{grid-column:1/-1}
+  .lbrow{grid-template-columns:40px 1.6fr .8fr .8fr}
+  .lbrow .fl{display:none}
+  .isle{width:140px}
+}
+@media (max-width:560px){
+  .hero{padding:14px 12px}
+  .flag{font-size:30px}
+  .tab{font-size:12.5px;padding:9px 4px}
+  .mscroll{padding:12px}
+  .mtop{padding:8px 12px}
+  .mfoot{padding-left:12px;padding-right:12px}
+  .timer .l{display:none}
+  .timer .hg{width:30px;height:46px}
+  .qtext{font-size:16px}
+  .opt{font-size:15px}
+  .timer .t{font-size:24px}
+  .mfoot .mrow{flex-direction:column;align-items:stretch}
+  .mfoot .grp .btn{flex:1}
+  .mfoot .btn.gold{width:100%}
+  .mcompass{width:64px}
+}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation:none!important;transition:none!important}
+}
+</style>
+</head>
+<body>
+<canvas id="sea" aria-hidden="true"></canvas>
+<div id="grid" aria-hidden="true"></div>
+<div id="mapart" aria-hidden="true"></div>
+
+<div id="app">
+  <header class="plank hero">
+    <div class="hero-top">
+      <span class="flag" aria-hidden="true">🏴‍☠️</span>
+      <div>
+        <h1 class="display">THE ONE ANAVA #21</h1>
+        <p class="tag display">Explore The Sea, <b>Chase The Victory</b></p>
+      </div>
+      <span class="flag" aria-hidden="true">⚓</span>
+    </div>
+    <div class="hud">
+      <div class="hbox cap">
+        <div class="skull" aria-hidden="true">💀</div>
+        <div style="min-width:0">
+          <div class="lbl">Kapten</div>
+          <div class="cname"><span id="cName">—</span><button class="mini" id="editName" title="Ganti nama kapten" aria-label="Ganti nama kapten">✎</button></div>
+          <div class="crank" id="cRank"></div>
+        </div>
+      </div>
+      <div class="hbox stat"><span class="ic">✨</span><b id="sXP">0</b><span class="lbl">Total XP</span></div>
+      <div class="hbox stat"><span class="ic">🪙</span><b id="sGold">0</b><span class="lbl">Koin Emas</span></div>
+      <div class="hbox prog">
+        <div class="row"><span class="lbl">Progress Pelayaran</span><b id="pTxt">0/7</b></div>
+        <div class="bar"><i id="pBar"></i><em id="pShip">⛵</em></div>
+        <small id="pNext"></small>
+      </div>
+    </div>
+  </header>
+
+  <nav class="tabs plank" role="tablist">
+    <button class="tab on" data-tab="map" role="tab">🗺️ Peta Pelayaran</button>
+    <button class="tab" data-tab="lb" role="tab">🏆 Papan Peringkat</button>
+    <button class="tab" data-tab="log" role="tab">📜 Logbook &amp; Badge</button>
+  </nav>
+
+  <main>
+    <section class="panel on" id="tab-map">
+      <div class="plank mapwrap">
+        <div class="maphead">
+          <h2 class="display">Samudra Tujuh Pulau</h2>
+          <div class="legend">🔒 Terkunci &nbsp;·&nbsp; ⚓ Siap berlabuh &nbsp;·&nbsp; ✔ Selesai — selesaikan satu pulau untuk membuka pelayaran ke pulau berikutnya.</div>
+        </div>
+        <div class="map" id="map">
+          <div class="mart" id="mapArtIn"></div>
+          <div class="mgrid"></div>
+          <div id="rulers"></div>
+          <div class="mcompass" id="mCompass"></div>
+          <span class="deco" style="left:4%;top:86%">🐋</span>
+          <span class="deco" style="left:46%;top:50%;animation-delay:-3s">🐙</span>
+          <span class="deco" style="left:88%;top:88%;animation-delay:-5s">🌊</span>
+          <svg id="routes" viewBox="0 0 100 100" preserveAspectRatio="none"></svg>
+          <div id="isles"></div>
+          <div class="ship" id="ship"><span>⛵</span></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel" id="tab-lb">
+      <div class="plank sect">
+        <div class="sect-h">
+          <h2 class="display">Papan Peringkat Armada</h2>
+          <div class="seg">
+            <button class="btn on" data-sort="xp">Urut XP</button>
+            <button class="btn" data-sort="avg">Urut Skor UTBK</button>
+          </div>
+        </div>
+        <div class="lb" id="lb"></div>
+        <p class="note">Skor UTBK = rata-rata skor terbaik dari pulau yang sudah diselesaikan (skala 200–1000). Kapten lain adalah data fiktif untuk simulasi.</p>
+      </div>
+    </section>
+
+    <section class="panel" id="tab-log">
+      <div class="plank sect">
+        <div class="sect-h"><h2 class="display">Logbook Pelayaran</h2><span class="legend" id="bCount"></span></div>
+        <div class="sums" id="sums"></div>
+        <div class="bgrid" id="badges"></div>
+        <h2 class="display" style="margin:20px 0 8px;font-size:18px;color:var(--gold)">Catatan Perjalanan</h2>
+        <div class="logs" id="logs"></div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    THE ONE ANAVA #21 — simulasi UTBK bertema bajak laut. Soal bersifat latihan singkat (4 soal/pulau).<br>
+    <button class="btn" id="resetBtn">☠ Mulai Ulang Pelayaran</button>
+  </footer>
+</div>
+
+<!-- Exam modal -->
+<div class="backdrop" id="modal" hidden>
+  <div class="plank modal" role="dialog" aria-modal="true" aria-labelledby="mTitle">
+    <div id="mBody"></div>
+  </div>
+</div>
+
+<!-- Intro modal -->
+<div class="backdrop" id="intro" hidden style="z-index:60">
+  <form class="plank introbox" id="introForm">
+    <div class="big" aria-hidden="true">🏴‍☠️</div>
+    <h2 class="display">Naik ke Geladak, Kapten!</h2>
+    <p style="margin:0;color:var(--muted)">Tujuh pulau menunggu. Siapa nama Anda?</p>
+    <input id="introName" maxlength="20" placeholder="Nama kapten" autocomplete="off" aria-label="Nama kapten">
+    <button class="btn gold" type="submit">Siap Berlayar ⚓</button>
+  </form>
+</div>
+
+<!-- Dialog -->
+<div class="backdrop" id="dlg" hidden><div class="plank dbox" id="dlgBox"></div></div>
+<div id="toasts" aria-live="polite"></div>
+
+<script>
+"use strict";
+/* ============ DATA ============ */
+const ISLANDS=[
+{id:'PU',es:'Isla de la Brújula',idn:'Penalaran Umum',sub:'Subtest Pertama',hue:150,time:300,q:[
+ {t:"Semua awak Kapal Elang membawa pedang. Rudi tidak membawa pedang.\nKesimpulan yang PASTI benar adalah ...",
+  o:["Rudi awak Kapal Elang yang lupa membawa pedang","Rudi bukan awak Kapal Elang","Rudi adalah kapten Kapal Elang","Semua pembawa pedang adalah awak Kapal Elang","Tidak ada kesimpulan yang dapat ditarik"],a:1,
+  h:"Gunakan kontraposisi: jika awak → membawa pedang, maka tidak membawa pedang → bukan awak."},
+ {t:"Perhatikan pola bilangan penunjuk arah berikut:\n2, 6, 12, 20, 30, ...\nBilangan selanjutnya adalah ...",
+  o:["36","40","44","42","48"],a:3,
+  h:"Selisih antarsuku: 4, 6, 8, 10, ... (bertambah 2 setiap langkah)."},
+ {t:"Lima kapal (P, Q, R, S, T) berlabuh sejajar dari kiri ke kanan.\n• S berada paling kanan.\n• P berada paling kiri.\n• Q tepat di sebelah kiri R.\n• T tidak bersebelahan dengan S.\nKapal yang berlabuh di posisi tengah (ke-3) adalah ...",
+  o:["P","R","S","T","Q"],a:4,
+  h:"Posisi 1 = P dan posisi 5 = S. Karena T tidak boleh di posisi 4, tentukan di mana Q–R bisa berdampingan."},
+ {t:"Jika badai datang, maka kapal tidak berlayar. Hari ini kapal berlayar.\nKesimpulan yang tepat adalah ...",
+  o:["Badai datang hari ini","Badai tidak datang hari ini","Kapal akan berlayar besok","Badai mungkin datang","Kapal tidak membawa peta"],a:1,
+  h:"Modus tollens: akibat tidak terjadi (kapal berlayar) → sebabnya juga tidak terjadi."}
+]},
+{id:'PPU',es:'Atol Prasasti Kuno',idn:'Pengetahuan & Pemahaman Umum',sub:'Subtest Kedua',hue:190,time:300,q:[
+ {t:"Penulisan kata baku yang benar terdapat pada pilihan ...",
+  o:["Apotik","Silahkan","Resiko","Analisa","Apotek"],a:4,
+  h:"Bentuk baku KBBI: apotek, silakan, risiko, analisis."},
+ {t:"Kata \"sauh\" dalam kalimat \"Nahkoda memerintahkan awak menurunkan sauh\" bermakna ...",
+  o:["Layar","Jangkar","Tiang","Kemudi","Dayung"],a:1,
+  h:"Benda berat yang diturunkan agar kapal tidak hanyut."},
+ {t:"Kalimat yang efektif adalah ...",
+  o:["Para nelayan-nelayan itu berangkat melaut saat fajar.","Nelayan itu berangkat melaut, ketika fajar.","Para nelayan itu berangkat melaut saat fajar.","Para nelayan-nelayan itu berangkat melaut pada saat fajar.","Adalah para nelayan itu berangkat melaut saat fajar."],a:2,
+  h:"Hindari pleonasme (\"para\" + kata ulang) dan tanda baca yang keliru."},
+ {t:"Majas pada kalimat \"Ombak menari-nari di atas geladak kapal\" adalah ...",
+  o:["Hiperbola","Metafora","Personifikasi","Ironi","Litotes"],a:2,
+  h:"Benda mati (ombak) diberi sifat manusia (menari)."}
+]},
+{id:'PBM',es:'Gua Botol Rahasia',idn:'Pemahaman Bacaan & Menulis',sub:'Subtest Ketiga',hue:270,time:300,q:[
+ {t:"Pinisi, kapal layar tradisional dari Sulawesi Selatan, diakui UNESCO sebagai warisan budaya tak benda pada tahun 2017. Pembuatan kapal ini bertumpu pada pengetahuan yang diwariskan turun-temurun, bahkan tanpa gambar rancangan tertulis.\n\nGagasan utama paragraf tersebut adalah ...",
+  o:["Pinisi dibuat tanpa gambar rancangan","UNESCO mengakui banyak kapal tradisional dunia","Pinisi diakui sebagai warisan budaya dengan pembuatan berbasis pengetahuan turun-temurun","Sulawesi Selatan terkenal dengan pelautnya","Kapal layar kini jarang digunakan"],a:2,
+  h:"Cari gagasan yang mencakup seluruh isi paragraf, bukan satu rincian saja."},
+ {t:"Cuaca di perairan itu sangat buruk. ... nahkoda memutuskan tetap berlayar demi mengejar jadwal.\n\nKata penghubung antarkalimat yang tepat untuk mengisi bagian rumpang adalah ...",
+  o:["Oleh karena itu,","Dengan demikian,","Misalnya,","Namun,","Selanjutnya,"],a:3,
+  h:"Kalimat kedua bertentangan dengan harapan dari kalimat pertama."},
+ {t:"Kalimat dengan penggunaan tanda baca yang tepat adalah ...",
+  o:["Ia membeli, peta kompas dan teropong.","Ia membeli peta, kompas, dan teropong.","Ia membeli peta kompas, dan, teropong.","Ia, membeli peta, kompas dan teropong,","Ia membeli: peta, kompas, dan, teropong."],a:1,
+  h:"Rincian tiga hal atau lebih dipisahkan koma; sebelum \"dan\" pada rincian terakhir juga diberi koma."},
+ {t:"(1) Penyu hijau bertelur di pantai berpasir. (2) Induk penyu menggali lubang dengan sirip belakangnya. (3) Harga bahan bakar kapal naik pada bulan ini. (4) Telur-telur itu kemudian ditimbun kembali dengan pasir.\n\nKalimat yang tidak padu dengan gagasan paragraf adalah ...",
+  o:["Kalimat (1)","Kalimat (2)","Kalimat (4)","Semua kalimat padu","Kalimat (3)"],a:4,
+  h:"Paragraf membahas cara penyu bertelur. Cari kalimat yang menyimpang topik."}
+]},
+{id:'PK',es:'Teluk Koin Emas',idn:'Pengetahuan Kuantitatif',sub:'Subtest Keempat',hue:45,time:300,q:[
+ {t:"Seorang bajak laut memiliki 480 koin emas. Ia menyimpan 25% di peti rahasia. Banyak koin di peti rahasia adalah ...",
+  o:["100","110","125","120","130"],a:3,
+  h:"25% = 1/4. Bagi 480 dengan 4."},
+ {t:"Kapal melaju dengan kecepatan tetap 36 km/jam selama 2,5 jam. Jarak tempuh kapal adalah ... km.",
+  o:["80","85","95","100","90"],a:4,
+  h:"Jarak = kecepatan × waktu."},
+ {t:"Rata-rata empat bilangan adalah 12. Tiga bilangan di antaranya adalah 10, 12, dan 14. Bilangan keempat adalah ...",
+  o:["10","11","12","13","14"],a:2,
+  h:"Jumlah keempat bilangan = 4 × 12 = 48. Kurangi dengan jumlah tiga bilangan yang diketahui."},
+ {t:"Perbandingan koin Jack dan Mira adalah 3 : 5. Jika total koin mereka 160, koin Mira adalah ...",
+  o:["60","80","120","100","90"],a:3,
+  h:"Total bagian = 8. Satu bagian = 160 ÷ 8."}
+]},
+{id:'LBI',es:'Semenanjung Pelaut',idn:'Literasi dalam Bahasa Indonesia',sub:'Subtest Kelima',hue:15,time:300,q:[
+ {t:"Nahkoda Laut berdiri di haluan, menatap kabut yang menelan cakrawala. Sudah tiga malam bintang tak tampak. Ia menggenggam kompas tua pemberian ayahnya, satu-satunya benda yang masih ia percayai.\n\nMakna kompas dalam kutipan tersebut adalah ...",
+  o:["Simbol kekayaan sang nahkoda","Simbol pegangan hidup sekaligus kenangan akan ayahnya","Tanda bahwa nahkoda akan menyerah","Benda yang sering rusak di tengah kabut","Alat yang hanya dipakai pada malam hari"],a:1,
+  h:"Perhatikan frasa \"pemberian ayahnya\" dan \"satu-satunya benda yang masih ia percayai\"."},
+ {t:"Hutan mangrove meredam hempasan gelombang, menjadi tempat berkembang biak ikan, dan menyimpan karbon dalam jumlah besar. Namun, luasnya terus menyusut karena kawasan itu dialihfungsikan menjadi tambak.\n\nSimpulan yang sesuai dengan teks adalah ...",
+  o:["Mangrove tidak lagi dibutuhkan pesisir","Tambak lebih bermanfaat daripada mangrove","Mangrove bermanfaat besar, tetapi luasnya menurun akibat alih fungsi lahan","Mangrove hanya berfungsi menyimpan karbon","Penyusutan mangrove disebabkan gelombang"],a:2,
+  h:"Simpulan harus memuat manfaat sekaligus masalah yang disebut teks."},
+ {t:"Pernyataan yang merupakan OPINI adalah ...",
+  o:["Pelabuhan Tanjung Priok berada di Jakarta Utara.","Indonesia disebut sebagai negara kepulauan.","Kapal feri itu berangkat pukul 07.00 WIB.","Pelabuhan itu adalah tempat paling indah di dunia.","Nelayan melaut dengan perahu bercadik."],a:3,
+  h:"Opini mengandung penilaian subjektif yang tidak bisa dibuktikan secara objektif."},
+ {t:"Kalimat utama sebuah paragraf terletak di awal, lalu diikuti kalimat-kalimat penjelas. Pola pengembangan paragraf seperti ini disebut ...",
+  o:["Induktif","Deduktif","Campuran","Deskriptif","Naratif"],a:1,
+  h:"Dari umum (kalimat utama) ke khusus (penjelas)."}
+]},
+{id:'LBE',es:'Pelabuhan Armada Asing',idn:'Literasi dalam Bahasa Inggris',sub:'Subtest Keenam',hue:210,time:300,q:[
+ {t:"The captain studied the map twice before ordering the crew to lower the anchor in a quiet bay. The sea was calm, and the sailors finally rested after a week of storms.\n\nWhat did the captain do before ordering the crew to lower the anchor?",
+  o:["He checked the weather report","He studied the map twice","He sent a message ashore","He counted the crew","He repaired the sail"],a:1,
+  h:"Look at the first sentence of the passage."},
+ {t:"The sailors were exhausted after the long voyage.\n\nThe word \"exhausted\" is closest in meaning to ...",
+  o:["excited","hungry","very tired","confused","proud"],a:2,
+  h:"Think about how people feel after a very long journey with little rest."},
+ {t:"If the wind ___ stronger, we would reach the harbor earlier.",
+  o:["is","was being","will be","has been","were"],a:4,
+  h:"This is a second conditional (unreal present): if + past form, would + verb."},
+ {t:"Ports have shaped trade for centuries. Ships carry goods from one continent to another, linking distant markets and cultures.\n\nWhat is the main idea of the passage?",
+  o:["Ships are faster than airplanes","Ports are mostly used for fishing","Ports and ships connect markets and cultures through trade","Goods are cheaper at sea","Continents are very far apart"],a:2,
+  h:"Choose the idea that covers both sentences, not just one detail."}
+]},
+{id:'PM',es:'Benteng Meriam Strategi',idn:'Penalaran Matematika',sub:'Subtest Ketujuh',hue:0,time:300,q:[
+ {t:"Sebuah benteng berbentuk persegi panjang berukuran 15 m × 8 m. Seutas tali dipasang mengelilingi dinding benteng tepat satu putaran. Panjang tali minimal yang diperlukan adalah ... m.",
+  o:["23","40","120","44","46"],a:4,
+  h:"Keliling persegi panjang = 2 × (panjang + lebar)."},
+ {t:"Tangga sepanjang 5 m bersandar pada dinding benteng. Jarak kaki tangga ke dinding adalah 3 m. Tinggi dinding yang dicapai ujung tangga adalah ... m.",
+  o:["2","3","4","5","8"],a:2,
+  h:"Segitiga siku-siku dengan sisi miring 5 dan satu sisi 3 (tripel Pythagoras)."},
+ {t:"Dalam sebuah peti terdapat 5 koin emas dan 3 koin perak. Satu koin diambil secara acak. Peluang terambil koin emas adalah ...",
+  o:["3/8","1/2","3/5","5/8","5/3"],a:3,
+  h:"Peluang = banyak koin emas ÷ banyak seluruh koin."},
+ {t:"Biaya menyewa kapal terdiri atas biaya tetap Rp200.000 ditambah Rp50.000 per jam. Biaya sewa selama 6 jam adalah ...",
+  o:["Rp400.000","Rp450.000","Rp600.000","Rp550.000","Rp500.000"],a:4,
+  h:"Biaya = 200.000 + 50.000 × jam."}
+]}
+];
+const N=ISLANDS.length;
+const SHORT=ISLANDS.map(i=>i.id);
+
+const BOTS=[
+ {name:"Laksamana Banyu Biru",fleet:"Kapal Naga Laut",avg:872,xp:2150,icon:"👑"},
+ {name:"Kapten Sekar Samudra",fleet:"Kapal Mawar Karang",avg:841,xp:1980,icon:"⚔️"},
+ {name:"Si Janggut Merah",fleet:"Kapal Jolly Senja",avg:790,xp:1720,icon:"☠️"},
+ {name:"Nahkoda Arunika",fleet:"Kapal Fajar Timur",avg:766,xp:1490,icon:"🧭"},
+ {name:"Komodor Taufan",fleet:"Kapal Badai Perak",avg:735,xp:1260,icon:"⚔️"},
+ {name:"Kelasi Layar Perak",fleet:"Kapal Camar Putih",avg:702,xp:1010,icon:"⚓"},
+ {name:"Bajak Laut Cakrawala",fleet:"Kapal Ombak Liar",avg:668,xp:820,icon:"🏴‍☠️"},
+ {name:"Pelaut Mutiara",fleet:"Kapal Kerang Emas",avg:624,xp:590,icon:"🪢"}
+];
+const RANKS=[[0,'Kelasi Baru','🪢'],[200,'Pelaut Muda','⚓'],[500,'Perwira Laut','🧭'],[900,'Kapten Samudra','🏴‍☠️'],[1400,'Komodor Badai','⚔️'],[2000,'Laksamana Agung','👑']];
+const doneN=s=>Object.keys(s.done).length;
+const BADGES=[
+ {id:'first',icon:'🧭',name:'Pelaut Perdana',desc:'Selesaikan pulau pertamamu.',test:s=>doneN(s)>=1},
+ {id:'nav',icon:'🗺️',name:'Master Navigator',desc:'Taklukkan 3 pulau.',test:s=>doneN(s)>=3},
+ {id:'cannon',icon:'💥',name:'Golden Cannoneer',desc:'Jawab semua soal benar di satu pulau.',test:s=>!!s.flags.perfect},
+ {id:'treasure',icon:'🪙',name:'Pemburu Harta',desc:'Kumpulkan 500 koin emas.',test:s=>s.gold>=500},
+ {id:'speed',icon:'⚡',name:'Kilat Samudra',desc:'Selesai dengan sisa waktu ≥ 50% dan minimal separuh soal benar.',test:s=>!!s.flags.fast},
+ {id:'eagle',icon:'🦅',name:'Mata Elang',desc:'Raih ≥ 75% benar tanpa memakai power-up.',test:s=>!!s.flags.clean},
+ {id:'roger',icon:'☠️',name:'Jolly Roger Sejati',desc:'Kumpulkan 1.000 XP.',test:s=>s.xp>=1000},
+ {id:'admiral',icon:'👑',name:'Laksamana Agung',desc:'Taklukkan ketujuh pulau.',test:s=>doneN(s)>=7}
+];
+
+/* ============ STATE ============ */
+const LS='anava21_voyage_v1';
+const BLANK=()=>({name:'',xp:0,gold:100,done:{},badges:{},flags:{},log:[]});
+function load(){try{const r=localStorage.getItem(LS);if(r)return Object.assign(BLANK(),JSON.parse(r));}catch(e){}return BLANK();}
+function save(){try{localStorage.setItem(LS,JSON.stringify(S));}catch(e){}}
+let S=load();
+let JUST=-1;           // pulau yang baru terbuka (animasi)
+let X=null;            // state ujian aktif
+let LB_SORT='xp';
+
+const $=s=>document.querySelector(s);
+const $$=s=>[...document.querySelectorAll(s)];
+const esc=t=>String(t).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const fmt=n=>n.toLocaleString('id-ID');
+const unlocked=i=>i===0||!!S.done[i-1];
+const rankOf=xp=>{let r=RANKS[0];for(const x of RANKS)if(xp>=x[0])r=x;return r;};
+
+/* ============ SVG ART ============ */
+const COMPASS=`<svg viewBox="-110 -110 220 220"><circle r="100" fill="none" stroke="#9fd0ff" stroke-width="2"/><circle r="84" fill="none" stroke="#9fd0ff" stroke-width="1" stroke-dasharray="2 5"/><path d="M0-92L11-11L92 0L11 11L0 92L-11 11L-92 0L-11-11Z" fill="#9fd0ff" opacity=".7"/><path d="M0-66L6-6L66 0L6 6L0 66L-6 6L-66 0L-6-6Z" fill="#fff" opacity=".45" transform="rotate(45)"/><circle r="6" fill="#f2c14e"/><g fill="#cfe8ff" font-family="Georgia,serif" font-weight="700" font-size="18" text-anchor="middle"><text y="-102">N</text><text x="106" y="6">E</text><text y="120">S</text><text x="-106" y="6">W</text></g></svg>`;
+function palm(x,y,sc,r){
+  return `<g transform="translate(${x} ${y}) rotate(${r}) scale(${sc})"><path d="M0 0Q4-14 1-30" stroke="#6b4423" stroke-width="3.4" fill="none" stroke-linecap="round"/><g fill="#33b043" stroke="#17702a" stroke-width=".9" stroke-linejoin="round"><path d="M1-30Q-14-47-34-33Q-14-36 1-30Z"/><path d="M1-30Q16-46 35-31Q16-35 1-30Z"/><path d="M1-30Q-8-50-22-52Q-10-44 1-30Z"/><path d="M1-30Q10-50 24-50Q11-43 1-30Z"/><path d="M1-30Q-2-52 3-56Q6-44 1-30Z"/></g><circle cx="-1.5" cy="-28" r="2.2" fill="#5a3716"/><circle cx="2.5" cy="-27" r="2" fill="#5a3716"/></g>`;
+}
+function islandSVG(i){
+  const g='gr'+i;
+  const rock=(x,y,sc)=>`<path transform="translate(${x} ${y}) scale(${sc})" d="M-8 0Q-9-9-2-11Q6-12 9-4Q10 0 8 1Z" fill="#8a8f99" stroke="#4d525b" stroke-width="1"/>`;
+  const bush=(x,y,sc)=>`<ellipse cx="${x}" cy="${y}" rx="${9*sc}" ry="${6*sc}" fill="#2a9a38" stroke="#17702a"/>`;
+  let d='';
+  switch(i){
+    case 0: d=palm(48,56,.95,-6)+palm(90,52,1.05,7)+rock(70,62,1);break;
+    case 1: d=`<ellipse cx="52" cy="58" rx="16" ry="6" fill="#e3c987"/>`+rock(50,58,1.1)+rock(60,60,.8)+palm(92,54,1.05,6);break;
+    case 2: d=palm(44,58,.85,-8)+palm(84,52,1.05,5)+bush(64,62,1)+bush(104,60,.8);break;
+    case 3: d=palm(48,56,1,-5)+`<g transform="translate(86 58)"><rect x="-9" y="-8" width="18" height="12" rx="2" fill="#7a4a22" stroke="#3a210d"/><path d="M-9-8Q0-17 9-8Z" fill="#a3622b" stroke="#3a210d"/><rect x="-2" y="-5" width="4" height="4" fill="#f2c14e"/></g>`;break;
+    case 4: d=palm(46,58,.9,-6)+palm(98,54,.85,8)+`<g transform="translate(72 58)"><rect x="-9" y="-9" width="18" height="11" fill="#c99a5b" stroke="#6b4423"/><path d="M-12-9L0-20L12-9Z" fill="#a3213a" stroke="#4a0d18"/><rect x="-2.5" y="-5" width="5" height="7" fill="#4a2f1c"/></g>`;break;
+    case 5: d=palm(50,56,.9,-7)+rock(80,60,1.2)+palm(98,52,.8,9)+bush(36,62,.8);break;
+    default: d=`<g transform="translate(70 54)"><rect x="-13" y="-22" width="26" height="24" fill="#8c919b" stroke="#454a53" stroke-width="1.4"/><rect x="-16" y="-27" width="6" height="7" fill="#8c919b" stroke="#454a53"/><rect x="-3" y="-27" width="6" height="7" fill="#8c919b" stroke="#454a53"/><rect x="10" y="-27" width="6" height="7" fill="#8c919b" stroke="#454a53"/><path d="M-4 2V-8Q0-14 4-8V2Z" fill="#2b1a0e"/></g>`+palm(36,58,.85,-8)+palm(104,56,.85,8);
+  }
+  return `<svg viewBox="0 0 140 108" aria-hidden="true"><defs><linearGradient id="${g}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#95e84f"/><stop offset="1" stop-color="#3ca62f"/></linearGradient></defs>
+   <ellipse cx="70" cy="93" rx="66" ry="12" fill="rgba(140,230,255,.17)"/>
+   <ellipse cx="70" cy="91" rx="54" ry="8" fill="rgba(190,245,255,.2)"/>
+   <path d="M12 60Q8 86 36 93Q70 103 106 93Q132 86 128 60Z" fill="#6e4726"/>
+   <path d="M12 60Q10 72 20 80Q44 90 70 90Q98 90 120 80Q130 72 128 60Q118 72 70 74Q22 72 12 60Z" fill="#4f3118"/>
+   <path d="M24 82Q46 92 70 92Q96 92 116 82" fill="none" stroke="#e8cf92" stroke-width="3" stroke-linecap="round" opacity=".9"/>
+   <path d="M12 60Q6 40 34 34Q62 24 98 32Q134 38 128 60Q104 77 70 77Q34 77 12 60Z" fill="url(#${g})" stroke="#2c7a22" stroke-width="1.2"/>
+   <path d="M22 62Q50 76 70 74Q100 76 120 62" fill="none" stroke="#ecd699" stroke-width="3" stroke-linecap="round" opacity=".85"/>
+   <path d="M30 46Q50 38 70 42" fill="none" stroke="#b9f77a" stroke-width="2" stroke-linecap="round" opacity=".55"/>
+   ${d}
+   <g transform="translate(116 82)"><path d="M-9 6L-13 25L-6 20L-2 27L2 8Z" fill="#a3213a" stroke="#4a0d18" stroke-width=".8"/><path d="M9 6L13 25L6 20L2 27L-2 8Z" fill="#7a1426" stroke="#4a0d18" stroke-width=".8"/><circle r="12" fill="#f2c14e" stroke="#7a5210" stroke-width="2"/><circle r="8.6" fill="none" stroke="#b8862b"/><polygon points="0,-7 1.9,-2.4 6.7,-2.2 3,1 4.2,5.7 0,3 -4.2,5.7 -3,1 -6.7,-2.2 -1.9,-2.4" fill="#fff3c4" stroke="#b8862b" stroke-width=".6"/></g></svg>`;
+}
+/* background peta navy: garis pantai, kapal, kompas, jalur putus-putus */
+function artSVG(p){
+  const inner=COMPASS.replace(/^<svg[^>]*>/,'').replace(/<\/svg>$/,'');
+  const comp=(x,y,r)=>`<svg x="${x-r}" y="${y-r}" width="${2*r}" height="${2*r}" viewBox="-110 -110 220 220" opacity=".5">${inner}</svg>`;
+  const ship=(x,y,sc,r)=>`<use href="#${p}ship" transform="translate(${x} ${y}) rotate(${r}) scale(${sc})"/>`;
+  return `<svg viewBox="0 0 1400 800" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+  <defs><g id="${p}ship"><path d="M-46 0Q-30 24 0 26Q30 24 46 0Z"/><path d="M0 0V-92M-24 0V-66M26 0V-62"/><path d="M-3-88Q-34-64-3-34Z"/><path d="M3-88Q34-64 3-34Z"/><path d="M-26-62Q-46-46-26-24Z"/><path d="M28-58Q46-42 28-22Z"/></g></defs>
+  <g fill="rgba(14,48,84,.45)" stroke="#5e9ccc" stroke-width="2" opacity=".42" stroke-linejoin="round">
+   <path d="M0 230C60 210 110 260 90 320C70 380 120 430 60 470C30 490 0 480 0 480Z"/>
+   <path d="M1400 40C1330 30 1280 80 1300 130C1320 180 1260 210 1300 250C1340 290 1400 270 1400 270Z"/>
+   <path d="M0 560C80 540 170 590 230 640C290 690 270 760 330 800L0 800Z"/>
+   <path d="M1400 560C1320 580 1250 640 1180 650C1110 662 1090 740 1010 800L1400 800Z"/>
+   <path d="M300 60C340 40 390 60 380 100C370 140 320 150 300 120C285 100 290 75 300 60Z"/>
+   <path d="M1180 330C1220 310 1260 330 1250 365C1240 395 1200 400 1180 375Z"/>
+   <path d="M640 700C690 680 740 700 730 740C720 775 670 780 650 750C635 730 630 712 640 700Z"/>
+  </g>
+  <g fill="none" stroke="#7fb5de" stroke-width="2" stroke-dasharray="2 9" stroke-linecap="round" opacity=".4">
+   <path d="M180 720C420 600 520 760 740 650"/><path d="M880 90C1020 170 1100 70 1260 150"/><path d="M430 90C520 200 600 130 700 230"/>
+  </g>
+  <g fill="rgba(8,30,55,.55)" stroke="#6aa6d4" stroke-width="1.6" opacity=".42">
+   ${ship(270,570,.9,-4)}${ship(1170,210,.8,5)}${ship(1060,690,1,0)}${ship(640,130,.6,3)}
+  </g>
+  ${comp(130,170,78)}${comp(120,690,64)}${comp(1290,430,48)}
+  </svg>`;
+}
+/* ============ OCEAN CANVAS ============ */
+(function(){
+  const c=$('#sea'),ctx=c.getContext('2d');
+  let w,h,dpr,t=0;
+  const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+  function resize(){dpr=Math.min(devicePixelRatio||1,2);w=c.width=innerWidth*dpr;h=c.height=innerHeight*dpr;}
+  function draw(){
+    ctx.clearRect(0,0,w,h);
+    const L=16;
+    for(let i=0;i<L;i++){
+      const base=h*(i+.5)/L, amp=(6+i*.9)*dpr, f=.0035/dpr*(1+(i%4)*.25), sp=.5+(i%5)*.12, a=.03+(i/L)*.045;
+      ctx.beginPath();
+      for(let x=0;x<=w;x+=18*dpr){
+        const y=base+Math.sin(x*f+t*sp+i*1.7)*amp+Math.sin(x*f*2.3-t*sp*.7+i)*amp*.4;
+        x===0?ctx.moveTo(x,y):ctx.lineTo(x,y);
+      }
+      ctx.strokeStyle=`rgba(150,205,255,${a})`;ctx.lineWidth=(1+i*.06)*dpr;ctx.stroke();
+    }
+  }
+  function loop(){t+=.016;draw();if(!reduce&&!document.hidden)requestAnimationFrame(loop);else if(!reduce)setTimeout(loop,500);}
+  addEventListener('resize',()=>{resize();draw();});
+  resize();draw();if(!reduce)requestAnimationFrame(loop);
+})();
+$('#mapart').innerHTML=artSVG('p');
+$('#mapArtIn').innerHTML=artSVG('m');
+$('#mCompass').innerHTML=COMPASS;
+
+/* ============ HUD ============ */
+function renderHUD(){
+  const r=rankOf(S.xp),n=doneN(S),pct=Math.round(n/N*100);
+  $('#cName').textContent=S.name||'—';
+  $('#cRank').textContent=r[2]+' '+r[1];
+  $('#sXP').textContent=fmt(S.xp);
+  $('#sGold').textContent=fmt(S.gold);
+  $('#pTxt').textContent=n+'/'+N+' pulau ('+pct+'%)';
+  $('#pBar').style.width=pct+'%';
+  $('#pShip').style.left=Math.max(3,Math.min(97,pct))+'%';
+  const nx=RANKS.find(x=>x[0]>S.xp);
+  $('#pNext').textContent=nx?('Gelar berikutnya: '+nx[2]+' '+nx[1]+' (butuh '+fmt(nx[0]-S.xp)+' XP lagi)'):'Gelar tertinggi tercapai — Laksamana Agung! 👑';
+}
+
+/* ============ MAP ============ */
+const POS={
+  h:[[9,66],[23,28],[37,70],[51,28],[65,70],[79,28],[92,64]],
+  v:[[30,7.5],[70,20],[30,33],[70,46],[30,59],[70,72],[50,88]]
+};
+const layout=()=>matchMedia('(max-width:960px)').matches?'v':'h';
+function buildRulers(){
+  let h='';
+  for(let i=1;i<10;i++){h+=`<span class="ruler" style="left:${i*10}%;top:4px">${90+i*5}°E</span>`;}
+  for(let i=1;i<5;i++){h+=`<span class="ruler" style="top:${i*20}%;left:6px">${10-i*5>=0?(10-i*5)+'°N':(i*5-10)+'°S'}</span>`;}
+  $('#rulers').innerHTML=h;
+}
+function renderMap(){
+  const L=layout(),P=POS[L],map=$('#map');
+  map.classList.toggle('vertical',L==='v');
+  let rt='';
+  for(let i=0;i<N-1;i++){
+    const [x1,y1]=P[i],[x2,y2]=P[i+1];
+    const d=L==='h'?`M${x1} ${y1} C${(x1+x2)/2} ${y1} ${(x1+x2)/2} ${y2} ${x2} ${y2}`:`M${x1} ${y1} C${x1} ${(y1+y2)/2} ${x2} ${(y1+y2)/2} ${x2} ${y2}`;
+    rt+=`<path class="rt-base" d="${d}"/><path class="rt ${unlocked(i+1)?'lit':''}" d="${d}"/>`;
+  }
+  $('#routes').innerHTML=rt;
+  $('#isles').innerHTML=ISLANDS.map((I,i)=>{
+    const lk=!unlocked(i),dn=!!S.done[i];
+    const st=lk?'locked':dn?'done':'open';
+    const stTxt=lk?'🔒 Terkunci':dn?('✔ Skor terbaik '+S.done[i].score):'⚓ Siap berlabuh';
+    const aria=I.es+' — '+I.sub+(lk?'. Terkunci, selesaikan '+ISLANDS[i-1].es+' terlebih dahulu.':dn?'. Selesai, skor terbaik '+S.done[i].score+'. Bisa diulang.':'. Terbuka.');
+    return `<button class="isle ${st} ${JUST===i?'just':''}" data-i="${i}" style="left:${P[i][0]}%;top:${P[i][1]}%" ${lk?'disabled aria-disabled="true"':''} aria-label="${esc(aria)}">
+      <span class="isle-art">${islandSVG(i)}<span class="fog"></span>${lk?'<span class="lock">🔒</span>':''}${dn?'<span class="stamp">✔</span>':''}${st==='open'?'<span class="skullmed">☠</span>':''}</span>
+      <span class="isle-num">${i+1}</span>
+      <span class="isle-name">${esc(I.es)}</span>
+      <span class="isle-sub">${SHORT[i]} · ${esc(I.idn)}</span>
+      <span class="isle-st">${stTxt}</span></button>`;
+  }).join('');
+  const cur=Math.min(doneN(S),N-1),sp=$('#ship');
+  sp.style.left=P[cur][0]+'%';sp.style.top=P[cur][1]+'%';
+}
+$('#isles').addEventListener('click',e=>{
+  const b=e.target.closest('.isle');
+  if(!b||b.disabled)return;
+  dialog('Mulai Ujian?',`Anda akan memulai ujian di <b>${ISLANDS[+b.dataset.i].es}</b>. Lanjutkan?`,[
+    {label:'Batal'},
+    {label:'▶ Mulai',cls:'gold',fn:()=>openExam(+b.dataset.i)}
+  ]);
+});
+matchMedia('(max-width:960px)').addEventListener('change',renderMap);
+
+/* ============ LEADERBOARD ============ */
+function renderLB(){
+  const ds=Object.values(S.done);
+  const avg=ds.length?Math.round(ds.reduce((a,d)=>a+d.score,0)/ds.length):0;
+  const rows=BOTS.map(b=>({...b})).concat([{name:S.name||'Kapten',fleet:'Armada Kamu',avg,xp:S.xp,icon:rankOf(S.xp)[2],me:true}]);
+  rows.sort((a,b)=>LB_SORT==='xp'?(b.xp-a.xp)||(b.avg-a.avg):(b.avg-a.avg)||(b.xp-a.xp));
+  const medal=['🥇','🥈','🥉'];
+  $('#lb').innerHTML=`<div class="lbrow head"><span style="text-align:center">#</span><span>Kapten</span><span class="fl">Armada</span><span style="text-align:right">Skor UTBK</span><span style="text-align:right">XP</span></div>`+
+   rows.map((r,i)=>`<div class="lbrow ${r.me?'me':''}"><span class="rk">${medal[i]||(i+1)}</span><span class="nm"><span>${r.icon}</span><span>${esc(r.name)}</span>${r.me?'<span class="you">KAMU</span>':''}</span><span class="fl">${esc(r.fleet)}</span><span class="n">${r.avg?r.avg:'—'}</span><span class="n">${fmt(r.xp)}</span></div>`).join('');
+}
+$$('[data-sort]').forEach(b=>b.addEventListener('click',()=>{
+  LB_SORT=b.dataset.sort;
+  $$('[data-sort]').forEach(x=>x.classList.toggle('on',x===b));
+  renderLB();
+}));
+
+/* ============ LOGBOOK ============ */
+function renderLog(){
+  const ds=Object.values(S.done);
+  const best=ds.length?Math.max(...ds.map(d=>d.score)):0;
+  const correct=ds.reduce((a,d)=>a+d.correct,0),tot=ds.reduce((a,d)=>a+d.total,0);
+  $('#sums').innerHTML=`<div><b>${ds.length}/${N}</b><small>Pulau selesai</small></div><div><b>${best||'—'}</b><small>Skor terbaik</small></div><div><b>${tot?Math.round(correct/tot*100)+'%':'—'}</b><small>Akurasi jawaban</small></div><div><b>${Object.keys(S.badges).length}/${BADGES.length}</b><small>Lencana</small></div>`;
+  $('#bCount').textContent=Object.keys(S.badges).length+' dari '+BADGES.length+' lencana terbuka';
+  $('#badges').innerHTML=BADGES.map(b=>{
+    const got=S.badges[b.id];
+    return `<div class="bdg ${got?'':'lockd'}"><div class="ico">${got?b.icon:'🔒'}</div><h3 class="display">${b.name}</h3><p>${b.desc}</p>${got?`<span class="when">Diraih ${new Date(got).toLocaleDateString('id-ID',{day:'numeric',month:'short',year:'numeric'})}</span>`:''}</div>`;
+  }).join('');
+  $('#logs').innerHTML=S.log.length?S.log.slice().reverse().map(l=>`<div class="logrow"><span>⚓ <b>${esc(ISLANDS[l.i].es)}</b> (${SHORT[l.i]}) — ${l.c}/${l.n} benar${l.first?'':' · ulang'}</span><span>Skor <b>${l.score}</b> · ${Math.floor(l.t/60)}m ${l.t%60}s</span></div>`).join(''):'<div class="logrow"><span style="color:var(--muted)">Belum ada catatan. Berlayarlah ke pulau pertama!</span></div>';
+}
+
+/* ============ TABS ============ */
+$$('.tab').forEach(t=>t.addEventListener('click',()=>{
+  $$('.tab').forEach(x=>x.classList.toggle('on',x===t));
+  $$('.panel').forEach(p=>p.classList.toggle('on',p.id==='tab-'+t.dataset.tab));
+  if(t.dataset.tab==='lb')renderLB();
+  if(t.dataset.tab==='log')renderLog();
+}));
+function renderAll(){renderHUD();renderMap();renderLB();renderLog();}
+
+/* ============ TOAST & DIALOG ============ */
+function toast(msg,kind){
+  const d=document.createElement('div');d.className='toast '+(kind||'');d.textContent=msg;
+  $('#toasts').appendChild(d);setTimeout(()=>d.remove(),4100);
+}
+function dialog(title,msg,btns){
+  const d=$('#dlg');
+  $('#dlgBox').innerHTML=`<h3 class="display">${title}</h3><p>${msg}</p><div class="row">${btns.map((b,i)=>`<button class="btn ${b.cls||''}" data-d="${i}">${b.label}</button>`).join('')}</div>`;
+  d._b=btns;d.hidden=false;
+  const f=$('#dlgBox .btn');if(f)f.focus();
+}
+$('#dlg').addEventListener('click',e=>{
+  const b=e.target.closest('[data-d]');if(!b)return;
+  const f=$('#dlg')._b[+b.dataset.d];$('#dlg').hidden=true;if(f.fn)f.fn();
+});
+
+/* ============ INTRO ============ */
+function openIntro(){
+  $('#introName').value=S.name||'';$('#intro').hidden=false;
+  setTimeout(()=>$('#introName').focus(),50);
+}
+$('#introForm').addEventListener('submit',e=>{
+  e.preventDefault();
+  const v=$('#introName').value.trim();
+  const first=!S.name;
+  S.name=v||'Kapten Misterius';save();
+  $('#intro').hidden=true;renderAll();
+  toast(first?'Selamat berlayar, '+S.name+'! Pulau pertama sudah terbuka. ⚓':'Nama kapten diperbarui.','good');
+});
+$('#editName').addEventListener('click',openIntro);
+$('#resetBtn').addEventListener('click',()=>dialog('Mulai Ulang?','Semua progres pulau, XP, koin, dan lencana akan dihapus.',[
+  {label:'Batal'},
+  {label:'☠ Ya, Reset',cls:'red',fn:()=>{const nm=S.name;S=BLANK();S.name=nm;JUST=-1;save();renderAll();toast('Pelayaran dimulai dari awal.');}}
+]));
+
+/* ============ EXAM ============ */
+const GLASS="M13 9H47C47 27 36 37 33.2 46C36 55 47 65 47 83H13C13 65 24 55 26.8 46C24 37 13 27 13 9Z";
+const hgSVG=`<svg class="hg" viewBox="0 0 60 92" aria-hidden="true"><defs><clipPath id="hgc"><path d="${GLASS}"/></clipPath><linearGradient id="sandg" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#ffe29a"/><stop offset="1" stop-color="#d9992b"/></linearGradient></defs>
+<rect x="8" y="3" width="44" height="6" rx="2" fill="#8a5a2b" stroke="#f2c14e"/><rect x="8" y="83" width="44" height="6" rx="2" fill="#8a5a2b" stroke="#f2c14e"/>
+<g clip-path="url(#hgc)"><rect id="hgTop" x="10" y="9" width="40" height="37" fill="url(#sandg)"/><rect id="hgBot" x="10" y="83" width="40" height="0" fill="url(#sandg)"/><rect id="hgStream" x="29.3" y="46" width="1.4" height="0" fill="#ffe29a"/></g>
+<path d="${GLASS}" fill="rgba(180,220,255,.12)" stroke="#bfe3ff" stroke-width="1.6"/></svg>`;
+
+function openExam(i){
+  const I=ISLANDS[i];
+  X={i,idx:0,ans:Array(I.q.length).fill(null),elim:{},hint:{},parrot:2,spy:2,used:0,total:I.time,left:I.time,start:Date.now(),done:false,timer:null};
+  $('#modal').hidden=false;document.body.classList.add('noscroll');
+  renderExam();
+  X.timer=setInterval(tick,250);
+}
+function fmtT(s){return String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0');}
+function tick(){
+  if(!X||X.done)return;
+  const ms=X.total*1000-(Date.now()-X.start);
+  X.left=Math.max(0,Math.ceil(ms/1000));
+  updateTimerUI(Math.max(0,ms)/(X.total*1000));
+  if(ms<=0){$('#dlg').hidden=true;toast('⏳ Waktu habis! Jawaban dikirim otomatis.');finishExam(true);}
+}
+function updateTimerUI(frac){
+  const tt=$('#tTime');if(!tt)return;
+  tt.textContent=fmtT(X.left);
+  $('#timer').classList.toggle('warn',X.left<=60);
+  const top=37*frac,bot=37*(1-frac);
+  $('#hgTop').setAttribute('y',46-top);$('#hgTop').setAttribute('height',top);
+  $('#hgBot').setAttribute('y',83-bot);$('#hgBot').setAttribute('height',bot);
+  $('#hgStream').setAttribute('height',frac>0?Math.max(0,37-bot):0);
+}
+function renderExam(keep){
+  const sc0=$('#mBody .mscroll'),st=(keep&&sc0)?sc0.scrollTop:0;
+  const I=ISLANDS[X.i],q=I.q[X.idx],el=X.elim[X.idx]||[],last=X.idx===I.q.length-1;
+  const chips=I.q.map((_,k)=>`<button class="chip ${k===X.idx?'cur':''} ${X.ans[k]!==null?'ans':''}" data-act="nav" data-q="${k}" aria-label="Soal ${k+1}">${k+1}</button>`).join('');
+  const opts=q.o.map((t,k)=>`<button class="opt ${X.ans[X.idx]===k?'sel':''} ${el.includes(k)?'off':''}" data-act="opt" data-k="${k}" ${el.includes(k)?'disabled':''}><span class="k">${'ABCDE'[k]}</span><span>${esc(t)}</span></button>`).join('');
+  const hints=(el.length?'<div class="hint g">🦜 Si Beo berbisik: dua opsi yang salah sudah disingkirkan dari soal ini.</div>':'')+(X.hint[X.idx]?`<div class="hint">🔭 <b>Petunjuk:</b> ${esc(q.h)}</div>`:'');
+  $('#mBody').innerHTML=`
+   <div class="mtop"><div class="mwrap mrow">
+     <div><small class="display">Pulau ${X.i+1} dari ${N} · ${SHORT[X.i]}</small><h2 class="display" id="mTitle">${esc(I.es)}</h2><small>${esc(I.idn)} — ${esc(I.sub)}</small></div>
+     <div class="hact"><div class="timer" id="timer"><span>${hgSVG}</span><div><div class="l">Kiprah Angin Ujian</div><div class="t" id="tTime">${fmtT(X.left)}</div></div></div>
+     <button class="btn xbtn" data-act="close" aria-label="Tinggalkan ujian">✕</button></div>
+   </div></div>
+   <div class="mscroll"><div class="mwrap">
+     <div class="chips">${chips}</div>
+     <div class="qcard">
+       <div class="qno">Soal ${X.idx+1} / ${I.q.length}</div>
+       <div class="qgrid">
+         <div class="qleft"><div class="qtext">${esc(q.t)}</div>${hints}</div>
+         <div class="qright"><div class="opts">${opts}</div>
+           <div class="pws">
+             <button class="pw" data-act="parrot" ${X.parrot<=0||el.length?'disabled':''}>🦜 Parrot Clue <small>(${X.parrot} sisa · hapus 2 opsi salah)</small></button>
+             <button class="pw sp" data-act="spy" ${X.spy<=0||X.hint[X.idx]?'disabled':''}>🔭 Spyglass View <small>(${X.spy} sisa · petunjuk)</small></button>
+           </div>
+         </div>
+       </div>
+     </div>
+   </div></div>
+   <div class="mfoot"><div class="mwrap mrow">
+     <div class="grp"><button class="btn" data-act="prev" ${X.idx===0?'disabled':''}>◀ Sebelumnya</button><button class="btn" data-act="next" ${last?'disabled':''}>Berikutnya ▶</button></div>
+     <button class="btn gold" data-act="submit">⚓ Kirim &amp; Lanjutkan Pelayaran</button>
+   </div></div>`;
+  $('#mBody .mscroll').scrollTop=st;
+  updateTimerUI(Math.max(0,X.total*1000-(Date.now()-X.start))/(X.total*1000));
+}
+function pickEliminate(){
+  const q=ISLANDS[X.i].q[X.idx];
+  const wrong=q.o.map((_,k)=>k).filter(k=>k!==q.a);
+  for(let i=wrong.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[wrong[i],wrong[j]]=[wrong[j],wrong[i]];}
+  return wrong.slice(0,2);
+}
+$('#mBody').addEventListener('click',e=>{
+  const b=e.target.closest('[data-act]');if(!b||!X||b.disabled)return;
+  const act=b.dataset.act,I=ISLANDS[X.i];
+  if(X.done){
+    if(act==='back')closeModal();
+    if(act==='next-isle'){const n=+b.dataset.i;closeModal();openExam(n);}
+    return;
+  }
+  if(act==='opt'){X.ans[X.idx]=+b.dataset.k;renderExam(true);}
+  else if(act==='nav'){X.idx=+b.dataset.q;renderExam();}
+  else if(act==='prev'){X.idx=Math.max(0,X.idx-1);renderExam();}
+  else if(act==='next'){X.idx=Math.min(I.q.length-1,X.idx+1);renderExam();}
+  else if(act==='parrot'){
+    if(X.parrot>0&&!X.elim[X.idx]){
+      X.elim[X.idx]=pickEliminate();X.parrot--;X.used++;
+      if(X.elim[X.idx].includes(X.ans[X.idx]))X.ans[X.idx]=null;
+      renderExam(true);
+    }
+  }
+  else if(act==='spy'){if(X.spy>0&&!X.hint[X.idx]){X.hint[X.idx]=true;X.spy--;X.used++;renderExam(true);}}
+  else if(act==='submit'){
+    const empty=X.ans.filter(a=>a===null).length;
+    dialog('Kirim Jawaban?',empty?`Masih ada <b>${empty}</b> soal belum dijawab. Tetap kirim dan lanjutkan pelayaran?`:'Semua soal sudah dijawab. Siap melanjutkan pelayaran?',[
+      {label:'Periksa Lagi'},{label:'⚓ Kirim',cls:'gold',fn:()=>finishExam(false)}
+    ]);
+  }
+  else if(act==='close')askLeave();
+});
+function askLeave(){
+  dialog('Tinggalkan Ujian?','Jawaban pada percobaan ini tidak akan disimpan dan pulau berikutnya tetap terkunci.',[
+    {label:'Lanjut Mengerjakan'},{label:'Tinggalkan',cls:'red',fn:closeModal}
+  ]);
+}
+function closeModal(){
+  if(X&&X.timer)clearInterval(X.timer);
+  X=null;$('#modal').hidden=true;document.body.classList.remove('noscroll');
+  renderAll();
+  if(JUST>=0){
+    const t=ISLANDS[JUST];
+    $('#map').scrollIntoView({behavior:'smooth',block:'center'});
+    setTimeout(()=>toast('🔓 '+t.es+' terbuka! Jalur pelayaran menyala.','good'),500);
+    setTimeout(()=>{JUST=-1;},3000);
+  }
+}
+function finishExam(timeout){
+  if(!X||X.done)return;
+  clearInterval(X.timer);X.done=true;
+  const I=ISLANDS[X.i],n=I.q.length;
+  let c=0;X.ans.forEach((a,q)=>{if(a===I.q[q].a)c++;});
+  const left=Math.max(0,X.total-Math.floor((Date.now()-X.start)/1000)>0?X.left:0);
+  const timeUsed=X.total-left;
+  const score=Math.round(200+800*c/n);
+  const prev=S.done[X.i],first=!prev;
+  let xp=0,gold=0;
+  if(first){xp=c*50+100+Math.min(30,Math.floor(left/10));gold=c*25+40;}
+  if(!prev||score>prev.score)S.done[X.i]={score,correct:c,total:n,time:timeUsed};
+  S.xp+=xp;S.gold+=gold;
+  if(c===n)S.flags.perfect=true;
+  if(left>=X.total*.5&&c/n>=.5)S.flags.fast=true;
+  if(X.used===0&&c/n>=.75)S.flags.clean=true;
+  S.log.push({i:X.i,score,c,n,t:timeUsed,first,ts:Date.now()});
+  if(S.log.length>40)S.log.shift();
+  const newB=[];
+  BADGES.forEach(b=>{if(!S.badges[b.id]&&b.test(S)){S.badges[b.id]=Date.now();newB.push(b);}});
+  JUST=(first&&X.i<N-1)?X.i+1:-1;
+  save();renderHUD();
+  const nextOpen=X.i<N-1;
+  const review=I.q.map((q,k)=>{
+    const ok=X.ans[k]===q.a;
+    return `<details><summary class="${ok?'ok':'no'}">${ok?'✔':'✘'} Soal ${k+1} — ${X.ans[k]===null?'tidak dijawab':ok?'benar':'salah'}</summary><p>${esc(q.t)}</p><p>Jawabanmu: <b>${X.ans[k]===null?'—':'ABCDE'[X.ans[k]]+'. '+esc(q.o[X.ans[k]])}</b><br>Jawaban benar: <b class="ok">${'ABCDE'[q.a]}. ${esc(q.o[q.a])}</b></p><p style="color:var(--muted)">💡 ${esc(q.h)}</p></details>`;
+  }).join('');
+  const verdict=c===n?'Sempurna! Meriam emasmu tak meleset! 💥':c>=n*.75?'Pelayaran yang gemilang!':c>=n/2?'Lumayan, ombak berhasil dilewati.':'Badai cukup ganas — coba ulangi untuk skor lebih baik!';
+  $('#mBody').innerHTML=`<div class="mscroll"><div class="mwrap res">
+    <div class="display" style="color:var(--muted);letter-spacing:.14em;font-size:12px">${timeout?'⏳ WAKTU HABIS · ':''}BERLABUH DI ${esc(I.es).toUpperCase()}</div>
+    <div class="ring"><div><b>${score}</b><small>Skor UTBK</small></div></div>
+    <h2 class="display" style="margin:4px 0;color:var(--gold)" id="mTitle">${verdict}</h2>
+    <div class="rsum"><div><b>${c}/${n}</b><small>Jawaban benar</small></div><div><b>+${xp}</b><small>XP</small></div><div><b>+${gold}</b><small>Koin Emas</small></div><div><b>${Math.floor(timeUsed/60)}m ${timeUsed%60}s</b><small>Waktu terpakai</small></div></div>
+    ${first?'':`<p style="color:var(--muted);margin:0 0 8px">Ini percobaan ulang — XP &amp; koin hanya diberikan pada penyelesaian pertama; skor terbaik tetap diperbarui (terbaik: <b>${S.done[X.i].score}</b>).</p>`}
+    ${first&&nextOpen?`<div class="unl">🔓 Pulau ${X.i+2} terbuka: <span class="display">${esc(ISLANDS[X.i+1].es)}</span><br><small style="font-weight:400">${esc(ISLANDS[X.i+1].idn)} — jalur pelayaran kini menyala di peta.</small></div>`:''}
+    ${first&&!nextOpen?`<div class="unl">👑 Ketujuh pulau telah ditaklukkan! Kamu kini ${rankOf(S.xp)[1]}.</div>`:''}
+    ${newB.length?`<div class="lbl">Lencana baru</div><div class="newb">${newB.map(b=>`<span>${b.icon} ${b.name}</span>`).join('')}</div>`:''}
+    <div class="rev">${review}</div>
+    <div class="rtn"><button class="btn" data-act="back">🗺️ Kembali ke Peta</button>${nextOpen&&unlocked(X.i+1)?`<button class="btn gold" data-act="next-isle" data-i="${X.i+1}">⛵ Berlayar ke ${esc(ISLANDS[X.i+1].es)}</button>`:''}</div>
+  </div></div>`;
+  $('#mBody .mscroll').scrollTop=0;
+  X.done=true;
+}
+
+/* keyboard */
+addEventListener('keydown',e=>{
+  if(e.key==='Escape'){
+    if(!$('#dlg').hidden){$('#dlg').hidden=true;return;}
+    if(!$('#intro').hidden&&S.name){$('#intro').hidden=true;return;}
+    if(!$('#modal').hidden){X&&!X.done?askLeave():closeModal();}
+    return;
+  }
+  if($('#modal').hidden||!$('#dlg').hidden||!$('#intro').hidden||!X||X.done)return;
+  const k='abcde'.indexOf(e.key.toLowerCase());
+  const el=X.elim[X.idx]||[];
+  if(k>=0&&e.key.length===1&&k<ISLANDS[X.i].q[X.idx].o.length&&!el.includes(k)){X.ans[X.idx]=k;renderExam(true);}
+  else if(e.key==='ArrowRight'&&X.idx<ISLANDS[X.i].q.length-1){X.idx++;renderExam();}
+  else if(e.key==='ArrowLeft'&&X.idx>0){X.idx--;renderExam();}
+});
+
+/* ============ INIT ============ */
+buildRulers();
+renderAll();
+if(!S.name)openIntro();
+</script>
+</body>
+</html>
